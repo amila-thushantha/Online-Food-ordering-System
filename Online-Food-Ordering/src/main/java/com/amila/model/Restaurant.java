@@ -20,7 +20,7 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany
+    @OneToOne
     private User owner;
 
     private String name;
@@ -29,7 +29,7 @@ public class Restaurant {
 
     private String cuisineType;
 
-    @OneToMany
+    @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
     @Embedded
