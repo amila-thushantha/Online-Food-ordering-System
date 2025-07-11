@@ -2,6 +2,7 @@ package com.amila.model;
 
 import com.amila.dto.RestaurantDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +25,9 @@ public class User {
 
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
 
     private  USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
 
