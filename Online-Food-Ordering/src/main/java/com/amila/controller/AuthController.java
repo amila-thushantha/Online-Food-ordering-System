@@ -44,18 +44,20 @@ public class AuthController {
     private CartRepository cartRepository;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) {
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) throws Exception {
 
         User isEmailExist = userRepository.findByEmail(user.getEmail());
         if (isEmailExist != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already used with another account");
+            throw new Exception("Email already used with another account");
         }
 
         User createdUser = new User();
         createdUser.setEmail(user.getEmail());
         createdUser.setFullName(user.getFullName());
         createdUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        createdUser.setRole(USER_ROLE.ROLE_CUSTOMER); // Default role
+
+        // 👇 Allow setting role via JSON for testing (DON'T use in production!)
+        createdUser.setRole(user.getRole() != null ? user.getRole() : USER_ROLE.ROLE_CUSTOMER);
 
         User savedUser = userRepository.save(createdUser);
 
@@ -63,21 +65,19 @@ public class AuthController {
         cart.setCustomer(savedUser);
         cartRepository.save(cart);
 
-        // Authenticate
-        Authentication authentication = authenticate(user.getEmail(), user.getPassword());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate JWT
         String jwt = jwtProvider.generateToken(authentication);
 
-        // Prepare response
         AuthResponse authResponse = new AuthResponse();
         authResponse.setJwt(jwt);
-        authResponse.setMessage("Registered successfully");
+        authResponse.setMessage("Register successfully");
         authResponse.setRole(savedUser.getRole());
 
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
+
 
     @PostMapping("/signin")
     public ResponseEntity<AuthResponse> signin(@RequestBody LoginRequest req) {
