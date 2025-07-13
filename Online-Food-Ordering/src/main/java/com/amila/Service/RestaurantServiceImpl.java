@@ -26,11 +26,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Autowired
     private UserRepository userRepository;
 
-
-
     @Override
     public Restaurant createRestaurant(CreateRestaurantRequest req, User user) {
-
         Address address = addressRepository.save(req.getAddress());
 
         Restaurant restaurant = new Restaurant();
@@ -42,37 +39,32 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setOpeningHours(req.getOpeningHours());
         restaurant.setImages(req.getImages());
         restaurant.setOwner(user);
-        restaurant.setDescription(req.getDescription());
-        restaurantRepository.save(restaurant);
+        restaurant.setOpen(true); // Default open status
 
-        return restaurant;
+        return restaurantRepository.save(restaurant);
     }
 
     @Override
     public Restaurant updateRestaurant(Long restaurantId, CreateRestaurantRequest updatedRestaurant) throws Exception {
+        Restaurant restaurant = findRestaurantById(restaurantId);
 
-        Restaurant restaurant= findRestaurantById(restaurantId);
-
-        if(restaurant.getCuisineType() != null){
+        if (updatedRestaurant.getCuisineType() != null) {
             restaurant.setCuisineType(updatedRestaurant.getCuisineType());
         }
-        if(restaurant.getDescription() != null) {
+        if (updatedRestaurant.getDescription() != null) {
             restaurant.setDescription(updatedRestaurant.getDescription());
         }
-        if(restaurant.getName() != null) {
+        if (updatedRestaurant.getName() != null) {
             restaurant.setName(updatedRestaurant.getName());
         }
-
 
         return restaurantRepository.save(restaurant);
     }
 
     @Override
     public void deleteRestaurant(Long restaurantId) throws Exception {
-
         Restaurant restaurant = findRestaurantById(restaurantId);
         restaurantRepository.delete(restaurant);
-
     }
 
     @Override
@@ -88,34 +80,29 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public Restaurant findRestaurantById(Long id) throws Exception {
         Optional<Restaurant> opt = restaurantRepository.findById(id);
-
-        if(opt.isEmpty()){
-            throw new Exception("Restaurant not found with id "+id);
+        if (opt.isEmpty()) {
+            throw new Exception("Restaurant not found with id " + id);
         }
-
         return opt.get();
-
     }
 
     @Override
     public Restaurant getRestaurantByUserId(Long id, Long userId) throws Exception {
-        return null;
+        // Optional override if needed for specific use-case
+        return getRestaurantByUserId(userId);
     }
 
     @Override
     public Restaurant getRestaurantByUserId(Long userId) throws Exception {
         Restaurant restaurant = restaurantRepository.findByOwnerId(userId);
-
-        if(restaurant==null){
-            throw new Exception("Restaurant not found with owner id "+userId);
+        if (restaurant == null) {
+            throw new Exception("Restaurant not found with owner id " + userId);
         }
         return restaurant;
     }
 
-
     @Override
     public RestaurantDto addToFavorites(Long restaurantId, User user) throws Exception {
-
         Restaurant restaurant = findRestaurantById(restaurantId);
 
         RestaurantDto dto = new RestaurantDto();
@@ -124,10 +111,11 @@ public class RestaurantServiceImpl implements RestaurantService {
         dto.setDescription(restaurant.getDescription());
         dto.setId(restaurantId);
 
-        if(user.getFavourites().contains(dto)){
+        if (user.getFavourites().contains(dto)) {
             user.getFavourites().remove(dto);
+        } else {
+            user.getFavourites().add(dto);
         }
-        else user.getFavourites().add(dto);
 
         userRepository.save(user);
         return dto;
@@ -136,10 +124,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public Restaurant updateRestaurantStatus(Long id) throws Exception {
         Restaurant restaurant = findRestaurantById(id);
-
-        restaurant.setOpen(!restaurant.isOpen());
-
-
+        restaurant.setOpen(!restaurant.isOpen()); // Toggle open status
         return restaurantRepository.save(restaurant);
     }
 }

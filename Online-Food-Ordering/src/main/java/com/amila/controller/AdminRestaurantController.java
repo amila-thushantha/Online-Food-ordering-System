@@ -81,7 +81,7 @@ public class AdminRestaurantController {
 
 
     @GetMapping("/user")
-    public ResponseEntity<MessageResponse> findRestaurantByUserId(
+    public ResponseEntity<Restaurant> findRestaurantByUserId(
             @RequestHeader("Authorization") String jwt
     ) throws Exception {
 
@@ -89,10 +89,9 @@ public class AdminRestaurantController {
 
         Restaurant restaurant = restaurantService.getRestaurantByUserId(user.getId());
 
-        MessageResponse res = new MessageResponse();
-        res.setMessage("Restaurant deleted successfully");
-        return new ResponseEntity<>(res, HttpStatus.CREATED);
+        return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
+
 
 
 
