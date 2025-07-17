@@ -1,8 +1,10 @@
 package com.amila.controller;
 
 import com.amila.Service.CartService;
+import com.amila.Service.UserService;
 import com.amila.model.Cart;
 import com.amila.model.CartItem;
+import com.amila.model.User;
 import com.amila.request.AddCartItemRequest;
 import com.amila.request.UpdateCartItemRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,9 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+
+    @Autowired
+    private UserService userService;
 
 
     @PutMapping("/cart/add")
@@ -49,7 +54,9 @@ public class CartController {
     public ResponseEntity<Cart> clearCart(
             @RequestHeader("Authorization") String jwt) throws Exception {
 
-        Cart cart = cartService.clearCart(jwt);
+        User user = userService.findUserByJwtToken(jwt);
+
+        Cart cart = cartService.clearCart(user.getId());
         return  new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
@@ -57,7 +64,8 @@ public class CartController {
     public ResponseEntity<Cart> findUserCart(
             @RequestHeader("Authorization") String jwt) throws Exception {
 
-        Cart cart = cartService.findCartByUserId(jwt);
+        User user = userService.findUserByJwtToken(jwt);
+        Cart cart = cartService.findCartByUserId(user.getId());
         return  new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
