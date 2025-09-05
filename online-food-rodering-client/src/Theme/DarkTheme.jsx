@@ -14,5 +14,8 @@ export const DarkTheme = createTheme({
             paper: "#0D0D0D"
         },
         textColor: { main: "#111111" }
+
+
+        
     }
 });
